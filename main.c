@@ -12,14 +12,14 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					101   // 10A = 50mV/A 5Vref 10bit
-#define Acc_min					204
-#define Acc_max					820
+#define I_max					200   // 30A = 10mV/A 5Vref 10bit
+#define Acc_min					150
+#define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
 
 volatile uint16_t Acc = 0;
 volatile int16_t I = 0;
-volatile bool loop = false;
+volatile uint8_t loop = 0;
 
 uint16_t I_offset = 0;
 
@@ -37,9 +37,9 @@ ISR(ADC_vect)
 	else
 	{
 		ADMUX = 2;
-		I = ADC;
+		I = 1023 - ADC;
 
-		loop = true;
+		loop++;
 	}
 }
 
@@ -66,35 +66,34 @@ int main(void)
 // 		_delay_ms(1);
 // 	}
 // 	I_offset = I_offset_filt >> 6;
-	I_offset = 512;
+	I_offset = 515;
 	
     while (1) 
     {
-		if (loop)
+		if (loop >= 2)
 		{
-			loop = false;
+			loop = 0;
 			
-				OCR0B = 127;
-// 			if (Acc <= Acc_min)
-// 			{
-// 				TCCR0A = 0b1;
-// 				OCR0B = 0;
-// 			}
-// 			else
-// 			{
-// 				TCCR0A = 0b100001;
-// 				
-// 				int16_t I_target_c;
-// 				if (Acc >= Acc_max)
-// 					I_target_c = I_max + I_offset;
-// 				else
-// 					I_target_c = (Acc - Acc_min)*I_max/Acc_range + I_offset;
-// 					
-// 				if ((I > I_target_c) && (OCR0B > 0))
-// 					OCR0B--;
-// 				else if ((I < I_target_c) && (OCR0B < 255))
-// 					OCR0B++;
-// 			}
+			if (Acc <= Acc_min)
+			{
+				TCCR0A = 0b1;
+				OCR0B = 0;
+			}
+			else
+			{
+				TCCR0A = 0b100001;
+				
+				int32_t I_target_c;
+				if (Acc >= Acc_max)
+					I_target_c = I_max + I_offset;
+				else
+					I_target_c = (((uint32_t) Acc) - Acc_min)*I_max/Acc_range + ((uint32_t) I_offset);
+					
+				if ((I > I_target_c) && (OCR0B > 0))
+					OCR0B--;
+				else if ((I < I_target_c) && (OCR0B < 255))
+					OCR0B++;
+			}
 		}
     }
 }
