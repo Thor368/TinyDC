@@ -12,7 +12,7 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					200   // 30A = 10mV/A 5Vref 10bit
+#define I_max					300   // 30A = 10cc/A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
@@ -37,7 +37,8 @@ ISR(ADC_vect)
 	else
 	{
 		ADMUX = 2;
-		I = 1023 - ADC;
+//		I = 1023 - ADC;
+		I = ADC;
 
 		loop++;
 	}
@@ -66,7 +67,7 @@ int main(void)
 // 		_delay_ms(1);
 // 	}
 // 	I_offset = I_offset_filt >> 6;
-	I_offset = 515;
+	I_offset = 512;
 	
     while (1) 
     {
