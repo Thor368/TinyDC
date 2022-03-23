@@ -46,10 +46,10 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	DDRB = 0b10;
+	DDRB = 0b1;
 	PORTB = 0;
-	OCR0B = 0;
-	TCCR0A = 0b100001;
+	OCR0A = 0;
+	TCCR0A = 0b10000001;
 	TCCR0B = 0b1;
 	ACSR = 0b10000000;
 	ADMUX = 2;
