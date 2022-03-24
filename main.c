@@ -12,7 +12,7 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					300   // 30A = 10cc/A
+#define I_max					100   // 0,488A/cc  2,05cc/A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
@@ -37,8 +37,8 @@ ISR(ADC_vect)
 	else
 	{
 		ADMUX = 2;
-//		I = 1023 - ADC;
-		I = ADC;
+		I = 1023 - ADC;
+//		I = ADC;
 
 		loop++;
 	}
@@ -69,7 +69,7 @@ int main(void)
 // 	I_offset = I_offset_filt >> 6;
 	I_offset = 512;
 	
-    while (1) 
+    while (1)
     {
 		if (loop >= 2)
 		{
@@ -78,11 +78,11 @@ int main(void)
 			if (Acc <= Acc_min)
 			{
 				TCCR0A = 0b1;
-				OCR0B = 0;
+				OCR0A = 0;
 			}
 			else
 			{
-				TCCR0A = 0b100001;
+				TCCR0A = 0b10000001;
 				
 				int32_t I_target_c;
 				if (Acc >= Acc_max)
@@ -90,10 +90,10 @@ int main(void)
 				else
 					I_target_c = (((uint32_t) Acc) - Acc_min)*I_max/Acc_range + ((uint32_t) I_offset);
 					
-				if ((I > I_target_c) && (OCR0B > 0))
-					OCR0B--;
-				else if ((I < I_target_c) && (OCR0B < 255))
-					OCR0B++;
+				if ((I > I_target_c) && (OCR0A > 0))
+					OCR0A--;
+				else if ((I < I_target_c) && (OCR0A < 255))
+					OCR0A++;
 			}
 		}
     }
