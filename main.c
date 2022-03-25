@@ -2,7 +2,8 @@
  * bumpercar.c
  *
  * Created: 03.09.2021 13:00:08
- * Author : AUKTORAAlexanderSchr
+ * Author : Alexander Schroeder
+ * Master
  */ 
 
 #define F_CPU					9600000
