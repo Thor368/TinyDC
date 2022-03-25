@@ -1,9 +1,7 @@
 /*
- * bumpercar.c
- *
  * Created: 03.09.2021 13:00:08
  * Author : Alexander Schroeder
- * Master
+ * Bumpercar
  */ 
 
 #define F_CPU					9600000
@@ -13,10 +11,12 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					200   // 30A = 10mV/A 5Vref 10bit
-#define Acc_min					330
-#define Acc_max					870
+#define I_max					200
+#define Acc_min					370
+#define Acc_max					900
+
 #define Acc_range				(Acc_max - Acc_min)
+
 
 volatile uint16_t Acc = 0;
 volatile int16_t I = 0;
@@ -38,8 +38,11 @@ ISR(ADC_vect)
 	else
 	{
 		ADMUX = 2;
+#ifdef INVERT_I
 		I = 1023 - ADC;
-
+#else
+		I = ADC;
+#endif
 		loop++;
 	}
 }
