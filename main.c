@@ -1,8 +1,7 @@
 /*
- * bumpercar.c
- *
  * Created: 03.09.2021 13:00:08
- * Author : AUKTORAAlexanderSchr
+ * Author : Alexander Schroeder
+ * eTrabi
  */ 
 
 #define F_CPU					9600000
@@ -12,7 +11,7 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					100   // 0,488A/cc  2,05cc/A
+#define I_max					410   // 0,488A/cc  2,05cc/A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
