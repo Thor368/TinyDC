@@ -14,8 +14,8 @@
 #include <stdbool.h>
 
 #define I_max					200   // 30A = 10mV/A 5Vref 10bit
-#define Acc_min					150
-#define Acc_max					920
+#define Acc_min					330
+#define Acc_max					870
 #define Acc_range				(Acc_max - Acc_min)
 
 volatile uint16_t Acc = 0;
@@ -67,7 +67,7 @@ int main(void)
 // 		_delay_ms(1);
 // 	}
 // 	I_offset = I_offset_filt >> 6;
-	I_offset = 515;
+	I_offset = 512;
 	
     while (1) 
     {
