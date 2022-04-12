@@ -11,14 +11,22 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define I_max					410   // 0,488A/cc  2,05cc/A
+#define INVERT_CUR
+//define INVERT_ACC
+
+#define SOFT_FUSE				1000
+
+#define TIMER_ON				((1 << COM0A1) | (1 << WGM01) | (1 << WGM00))
+#define TIMER_INIT				((1 << WGM01) | (1 << WGM00))
+#define OCR						OCR0A
+
+#define I_max					205   // 0,488A/cc  2,05cc/A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
 
 volatile uint16_t Acc = 0;
 volatile int16_t I = 0;
-volatile uint8_t loop = 0;
 
 uint16_t I_offset = 0;
 
@@ -36,10 +44,21 @@ ISR(ADC_vect)
 	else
 	{
 		ADMUX = 2;
+#ifdef INVERT_CUR
 		I = 1023 - ADC;
-//		I = ADC;
+#else
+		I = ADC;
+#endif
 
-		loop++;
+#ifdef SOFT_FUSE
+		if (I >= SOFT_FUSE)
+		{
+			TCCR0A = TIMER_INIT;
+			OCR = 0;
+			cli();
+			while(1);
+		}
+#endif
 	}
 }
 
@@ -47,9 +66,9 @@ int main(void)
 {
 	DDRB = 0b1;
 	PORTB = 0;
-	OCR0A = 0;
-	TCCR0A = 0b10000001;
-	TCCR0B = 0b1;
+	OCR = 0;
+	TCCR0A = TIMER_INIT;
+	TCCR0B = (1 << CS01);
 	ACSR = 0b10000000;
 	ADMUX = 2;
 	ADCSRA = 0b11111110;
@@ -57,31 +76,35 @@ int main(void)
 	
 	sei();
 	
-// 	_delay_ms(100);
-// 	uint32_t I_offset_filt = 0;
-// 	for (uint8_t i = 0; i < 255; i++)
-// 	{
-// 		I_offset_filt -= I_offset_filt >> 6;
-// 		I_offset_filt += I;
-// 		_delay_ms(1);
-// 	}
-// 	I_offset = I_offset_filt >> 6;
-	I_offset = 512;
-	
+	_delay_ms(500);
+	uint16_t I_offset_filt = I << 6;
+	for (uint16_t i = 0; i < 500; i++)
+	{
+		I_offset_filt -= I_offset_filt >> 6;
+		I_offset_filt += I;
+		_delay_ms(1);
+	}
+	I_offset = I_offset_filt >> 6;
+
+// 	I_offset = 512;
+
+// 	TCCR0A = TIMER_ON;
+// 	OCR = 127;
+
     while (1)
     {
-		if (loop >= 2)
+		if (TIFR0 & (1 << TOV0))
 		{
-			loop = 0;
+			TIFR0 |= 1 << TOV0;
 			
 			if (Acc <= Acc_min)
 			{
-				TCCR0A = 0b1;
-				OCR0A = 0;
+				TCCR0A = TIMER_INIT;
+				OCR = 0;
 			}
 			else
 			{
-				TCCR0A = 0b10000001;
+				TCCR0A = TIMER_ON;
 				
 				int32_t I_target_c;
 				if (Acc >= Acc_max)
@@ -89,10 +112,10 @@ int main(void)
 				else
 					I_target_c = (((uint32_t) Acc) - Acc_min)*I_max/Acc_range + ((uint32_t) I_offset);
 					
-				if ((I > I_target_c) && (OCR0A > 0))
-					OCR0A--;
-				else if ((I < I_target_c) && (OCR0A < 255))
-					OCR0A++;
+				if ((I > I_target_c) && (OCR > 0))
+					OCR--;
+				else if ((I < I_target_c) && (OCR < 255))
+					OCR++;
 			}
 		}
     }
