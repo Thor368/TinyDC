@@ -20,7 +20,7 @@
 #define TIMER_INIT				((1 << WGM01) | (1 << WGM00))
 #define OCR						OCR0A
 
-#define I_max					205   // 0,488A/cc  2,05cc/A
+#define I_max					311   // 0,446-2cc
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
@@ -85,8 +85,6 @@ int main(void)
 		_delay_ms(1);
 	}
 	I_offset = I_offset_filt >> 6;
-
-// 	I_offset = 512;
 
 // 	TCCR0A = TIMER_ON;
 // 	OCR = 127;
