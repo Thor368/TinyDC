@@ -11,7 +11,7 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
-#define INVERT_CUR
+//#define INVERT_CUR
 //define INVERT_ACC
 
 #define SOFT_FUSE				1000
@@ -20,7 +20,7 @@
 #define TIMER_INIT				((1 << WGM01) | (1 << WGM00))
 #define OCR						OCR0A
 
-#define I_max					372   // 0,446-2cc
+#define I_max					16   // 4mV/A -> 500A max
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
@@ -87,7 +87,7 @@ int main(void)
 	I_offset = I_offset_filt >> 6;
 
 // 	TCCR0A = TIMER_ON;
-// 	OCR = 127;
+// 	OCR = I_offset >> 2;
 
     while (1)
     {
@@ -118,4 +118,3 @@ int main(void)
 		}
     }
 }
-
