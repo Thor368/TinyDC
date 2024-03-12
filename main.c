@@ -21,7 +21,7 @@
 #define TIMER_ON				((1 << COM0A1) | TIMER_INIT)
 #define OCR						OCR0A
 
-#define I_max					128   // 4mV/A -> 500A max
+#define I_max					163   // 4mV/A -> 500A max => 200A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
