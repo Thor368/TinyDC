@@ -4,6 +4,7 @@
  * eTrabi
  */ 
 
+//#define F_CPU					9600000
 #define F_CPU					9600000
 
 #include <avr/io.h>
@@ -16,8 +17,8 @@
 
 #define SOFT_FUSE				1000
 
-#define TIMER_INIT				((1 << WGM01) | (1 << WGM00))  // Fast PWM
-//#define TIMER_INIT				(1 << WGM00) // Phase Correct
+//#define TIMER_INIT				((1 << WGM01) | (1 << WGM00))  // Fast PWM
+#define TIMER_INIT				(1 << WGM00) // Phase Correct
 #define TIMER_ON				((1 << COM0A1) | TIMER_INIT)
 #define OCR						OCR0A
 
@@ -69,8 +70,8 @@ int main(void)
 	PORTB = 0;
 	OCR = 0;
 	TCCR0A = TIMER_INIT;
-	TCCR0B = (1 << CS01) | (1 << CS00);  // 585Hz
-//	TCCR0B = (1 << CS01);  // 2,34kHz
+//	TCCR0B = (1 << CS01) | (1 << CS00);  // 585Hz
+	TCCR0B = (1 << CS01);  // 2,34kHz
 	ACSR = 0b10000000;
 	ADMUX = 2;
 	ADCSRA = 0b11111110;
