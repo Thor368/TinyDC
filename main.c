@@ -13,14 +13,17 @@
 #include <stdbool.h>
 
 //#define INVERT_CUR
-//define INVERT_ACC
+//#define INVERT_ACC
 
 #define SOFT_FUSE				1000
 
-//#define TIMER_INIT				((1 << WGM01) | (1 << WGM00))  // Fast PWM
-#define TIMER_INIT				(1 << WGM00) // Phase Correct
-#define TIMER_ON				((1 << COM0A1) | TIMER_INIT)
-#define OCR						OCR0A
+//#define TIMER_WGM				((1 << WGM01) | (1 << WGM00))  // Fast PWM
+#define TIMER_WGM				(1 << WGM00) // Phase Correct
+//#define TIMER_OCR				0b10000000  // OCR1A non inverted
+//#define TIMER_OCR				0b10110000  // OCR1A high side, OCR1B low side
+#define TIMER_OCR				0b11100000  // OCR1A high side, OCR1B low side (inverted)
+#define TIMER_OFF				TIMER_WGM
+#define TIMER_ON				(TIMER_OCR | TIMER_WGM)
 
 #define I_max					163   // 4mV/A -> 500A max => 200A
 #define Acc_min					150
@@ -55,8 +58,9 @@ ISR(ADC_vect)
 #ifdef SOFT_FUSE
 		if (I >= SOFT_FUSE)
 		{
-			TCCR0A = TIMER_INIT;
-			OCR = 0;
+			TCCR0A = TIMER_OFF;
+			OCR0A = 0;
+			OCR0B = 0;
 			cli();
 			while(1);
 		}
@@ -66,16 +70,21 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	DDRB = 0b1;
-	PORTB = 0;
-	OCR = 0;
-	TCCR0A = TIMER_INIT;
-//	TCCR0B = (1 << CS01) | (1 << CS00);  // 585Hz
-	TCCR0B = (1 << CS01);  // 2,34kHz
+	DDRB = 0b11;
+	PORTB = 0b11;
+	OCR0A = 0;
+	OCR0B = 0;
+	TCCR0A = TIMER_OFF;
+	TCCR0B = (1 << CS01);
 	ACSR = 0b10000000;
 	ADMUX = 2;
 	ADCSRA = 0b11111110;
 	ADCSRB = 0;
+	
+	TCCR0A = TIMER_ON;
+	OCR0A = 30;
+	OCR0B = 30;
+	while(1);
 	
 	sei();
 	
@@ -89,9 +98,6 @@ int main(void)
 	}
 	I_offset = I_offset_filt >> 6;
 
-// 	TCCR0A = TIMER_ON;
-// 	OCR =127;
-
     while (1)
     {
 		if (TIFR0 & (1 << TOV0))
@@ -100,8 +106,8 @@ int main(void)
 			
 			if (Acc <= Acc_min)
 			{
-				TCCR0A = TIMER_INIT;
-				OCR = 0;
+				TCCR0A = TIMER_OFF;
+				OCR0A = 0;
 			}
 			else
 			{
@@ -113,11 +119,13 @@ int main(void)
 				else
 					I_target_c = (((uint32_t) Acc) - Acc_min)*I_max/Acc_range + ((uint32_t) I_offset);
 					
-				if ((I > I_target_c) && (OCR > 0))
-					OCR--;
-				else if ((I < I_target_c) && (OCR < 255))
-					OCR++;
+				if ((I > I_target_c) && (OCR0A > 0))
+					OCR0A--;
+				else if ((I < I_target_c) && (OCR0A < 255))
+					OCR0A++;
 			}
+
+			OCR0B = OCR0A;
 		}
     }
 }
