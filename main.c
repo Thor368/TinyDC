@@ -12,20 +12,22 @@
 #include <util/delay.h>
 #include <stdbool.h>
 
+//#define DEBUG_DUTY				127
+
 //#define INVERT_CUR
 //#define INVERT_ACC
 
 #define SOFT_FUSE				1000
 
-//#define TIMER_WGM				((1 << WGM01) | (1 << WGM00))  // Fast PWM
 #define TIMER_WGM				(1 << WGM00) // Phase Correct
 //#define TIMER_OCR				0b10000000  // OCR1A non inverted
-//#define TIMER_OCR				0b10110000  // OCR1A high side, OCR1B low side
 #define TIMER_OCR				0b11100000  // OCR1A high side, OCR1B low side (inverted)
 #define TIMER_OFF				TIMER_WGM
 #define TIMER_ON				(TIMER_OCR | TIMER_WGM)
+#define TIMER_DT				10  // PWM dead time insertion
 
-#define I_max					163   // 4mV/A -> 500A max => 200A
+
+#define I_max					41   // 4mV/A -> 500A max => 200A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
@@ -81,11 +83,6 @@ int main(void)
 	ADCSRA = 0b11111110;
 	ADCSRB = 0;
 	
-	TCCR0A = TIMER_ON;
-	OCR0A = 30;
-	OCR0B = 30;
-	while(1);
-	
 	sei();
 	
 	_delay_ms(500);
@@ -104,6 +101,7 @@ int main(void)
 		{
 			TIFR0 |= 1 << TOV0;
 			
+			#ifndef DEBUG_DUTY
 			if (Acc <= Acc_min)
 			{
 				TCCR0A = TIMER_OFF;
@@ -124,8 +122,19 @@ int main(void)
 				else if ((I < I_target_c) && (OCR0A < 255))
 					OCR0A++;
 			}
+			#else
+			TCCR0A = TIMER_ON;
+			OCR0A = DEBUG_DUTY;
+			#endif
 
+			#ifdef TIMER_DT
+			if (OCR0A > (255-TIMER_DT))
+				OCR0B = 255;
+			else
+				OCR0B = OCR0A + TIMER_DT;
+			#else
 			OCR0B = OCR0A;
+			#endif
 		}
     }
 }
