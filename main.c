@@ -14,7 +14,7 @@
 
 //#define DEBUG_DUTY				127
 
-//#define INVERT_CUR
+#define INVERT_CUR
 //#define INVERT_ACC
 
 #define SOFT_FUSE				1000
@@ -27,7 +27,7 @@
 #define TIMER_DT				10  // PWM dead time insertion
 
 
-#define I_max					41   // 4mV/A -> 500A max => 200A
+#define I_max					204   // 4mV/A -> 500A max => 250A
 #define Acc_min					150
 #define Acc_max					920
 #define Acc_range				(Acc_max - Acc_min)
