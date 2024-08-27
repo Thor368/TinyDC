@@ -29,19 +29,19 @@
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
     <avrtool>com.atmel.avrdbg.tool.ispmk2</avrtool>
-    <avrtoolserialnumber>000200215944</avrtoolserialnumber>
+    <avrtoolserialnumber>000200016530</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E9007</avrdeviceexpectedsignature>
     <avrtoolinterface>ISP</avrtoolinterface>
-    <avrtoolinterfaceclock>1000000</avrtoolinterfaceclock>
+    <avrtoolinterfaceclock>125000</avrtoolinterfaceclock>
     <com_atmel_avrdbg_tool_ispmk2>
       <ToolOptions>
         <InterfaceProperties>
-          <IspClock>1000000</IspClock>
+          <IspClock>125000</IspClock>
         </InterfaceProperties>
         <InterfaceName>ISP</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.ispmk2</ToolType>
-      <ToolNumber>000200215944</ToolNumber>
+      <ToolNumber>000200016530</ToolNumber>
       <ToolName>AVRISP mkII</ToolName>
     </com_atmel_avrdbg_tool_ispmk2>
   </PropertyGroup>

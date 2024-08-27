@@ -24,7 +24,7 @@
 #define TIMER_OCR				0b11100000  // OCR1A high side, OCR1B low side (inverted)
 #define TIMER_OFF				TIMER_WGM
 #define TIMER_ON				(TIMER_OCR | TIMER_WGM)
-#define TIMER_DT				10  // PWM dead time insertion
+#define TIMER_DT				15  // PWM dead time insertion
 
 
 #define I_max					204   // 4mV/A -> 500A max => 250A
